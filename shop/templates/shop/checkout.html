@@ -1,0 +1,354 @@
+<!-- templates/shop/checkout.html -->
+{% extends 'base.html' %}
+{% load currency_filters %}
+{% block title %}Checkout - E-Commerce Store{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'shop:cart_detail' %}">Cart</a></li>
+                <li class="breadcrumb-item active">Checkout</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<h2 class="mb-4">
+    <i class="fas fa-credit-card"></i> Checkout
+</h2>
+
+<div class="row">
+    <!-- Checkout Form -->
+    <div class="col-lg-8">
+        <form method="post" id="checkout-form">
+            {% csrf_token %}
+            
+            <!-- Shipping Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shipping-fast"></i> Shipping Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                First Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                Last Name <span class="text-danger">*</span>
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                            Email Address <span class="text-danger">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">We'll send your order confirmation to this email.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.phone.id_for_label }}" class="form-label">
+                            Phone Number <span class="text-danger">*</span>
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="text-danger small">{{ form.phone.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">For delivery contact purposes.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">
+                            Street Address <span class="text-danger">*</span>
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                            <div class="text-danger small">{{ form.address.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.city.id_for_label }}" class="form-label">City</label>
+                            {{ form.city }}
+                            {% if form.city.errors %}
+                                <div class="text-danger small">{{ form.city.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.state.id_for_label }}" class="form-label">State/Province</label>
+                            {{ form.state }}
+                            {% if form.state.errors %}
+                                <div class="text-danger small">{{ form.state.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.postal_code.id_for_label }}" class="form-label">Postal Code</label>
+                            {{ form.postal_code }}
+                            {% if form.postal_code.errors %}
+                                <div class="text-danger small">{{ form.postal_code.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card"></i> Payment Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Secure Payment:</strong> You will be redirected to Flutterwave to complete your payment securely.
+                    </div>
+                    
+                    <div class="payment-methods">
+                        <h6 class="mb-3">Accepted Payment Methods:</h6>
+                        <div class="row g-2">
+                            <div class="col-6 col-md-3">
+                                <div class="payment-method-card text-center p-3 border rounded">
+                                    <i class="fas fa-credit-card fa-2x text-primary mb-2"></i>
+                                    <small class="d-block">Cards</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="payment-method-card text-center p-3 border rounded">
+                                    <i class="fas fa-university fa-2x text-success mb-2"></i>
+                                    <small class="d-block">Bank Transfer</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="payment-method-card text-center p-3 border rounded">
+                                    <i class="fas fa-mobile-alt fa-2x text-warning mb-2"></i>
+                                    <small class="d-block">USSD</small>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="payment-method-card text-center p-3 border rounded">
+                                    <i class="fas fa-phone fa-2x text-info mb-2"></i>
+                                    <small class="d-block">Mobile Money</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6><i class="fas fa-info-circle text-primary"></i> How it works:</h6>
+                        <ol class="mb-0">
+                            <li>Click "Proceed to Payment" below</li>
+                            <li>You'll be securely redirected to Flutterwave</li>
+                            <li>Choose your preferred payment method</li>
+                            <li>Complete your payment</li>
+                            <li>You'll be redirected back with confirmation</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <label class="form-check-label" for="terms">
+                            I agree to the <a href="{% url 'shop:terms_of_service' %}" target="_blank">Terms and Conditions</a> 
+                            and <a href="{% url 'shop:privacy_policy' %}" target="_blank">Privacy Policy</a>
+                            <span class="text-danger">*</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+  <!-- Order Summary -->
+<div class="col-lg-4">
+    <div class="card sticky-top" style="top: 20px;">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-receipt"></i> Order Summary
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Cart Items -->
+            {% for item in cart.items.all %}
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div class="d-flex align-items-center">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                             class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                             style="width: 50px; height: 50px;">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-0 small">{{ item.product.name }}</h6>
+                        <small class="text-muted">Qty: {{ item.quantity }}</small>
+                    </div>
+                </div>
+                <span class="fw-bold">{{ item.get_total_price|naira }}</span>
+            </div>
+            {% endfor %}
+
+            <!-- Pricing Breakdown -->
+            <div class="border-top pt-3">
+                <!-- Subtotal -->
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span>{{ subtotal_ngn|floatformat:2 }} NGN</span>
+                </div>
+                
+                <!-- Shipping Fee -->
+                <div class="d-flex justify-content-between mb-2">
+                    <span>
+                        Shipping:
+                        {% if subtotal_ngn < 10000 %}
+                            <small class="text-muted">(orders below ₦10,000)</small>
+                        {% else %}
+                            <small class="text-muted">(orders ₦10,000+)</small>
+                        {% endif %}
+                    </span>
+                    <span class="text-info fw-bold">₦{{ shipping_fee_ngn|floatformat:2 }}</span>
+                </div>
+                
+                <!-- Tax -->
+                <div class="d-flex justify-content-between mb-2">
+                    <span>
+                        Tax:
+                        {% if subtotal_ngn >= 10000 %}
+                            <small class="text-muted">(orders ₦10,000+)</small>
+                        {% else %}
+                            <small class="text-muted">(no tax)</small>
+                        {% endif %}
+                    </span>
+                    <span class="{% if tax_ngn > 0 %}text-warning{% else %}text-success{% endif %} fw-bold">
+                        {% if tax_ngn > 0 %}
+                            ₦{{ tax_ngn|floatformat:2 }}
+                        {% else %}
+                            FREE
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <hr>
+                
+                <!-- Total -->
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="h5 fw-bold">Total:</span>
+                    <span class="h5 text-primary fw-bold">₦{{ total_ngn|floatformat:2 }}</span>
+                </div>
+                
+                <!-- Savings Info -->
+                {% if subtotal_ngn < 10000 %}
+                <div class="alert alert-warning py-2 px-3 small mb-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Tip:</strong> Add ₦{{ 10000|add:"-"|add:subtotal_ngn|floatformat:2 }} more to get lower shipping (₦1,000 → ₦2,000) and unlock tax benefits!
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+                <button type="submit" form="checkout-form" class="btn btn-primary btn-lg" id="proceedBtn">
+                    <i class="fas fa-lock"></i> Proceed to Payment
+                </button>
+                <a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Cart
+                </a>
+            </div>
+
+            <!-- Security Badge -->
+            <div class="mt-3 text-center">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt text-success"></i> Secured by Flutterwave
+                </small>
+            </div>
+
+            <!-- Flutterwave Logo -->
+            <div class="text-center mt-3">
+                <img src="https://flutterwave.com/images/logo/full.svg" alt="Flutterwave" style="max-width: 150px; opacity: 0.7;">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('checkout-form');
+    const proceedBtn = document.getElementById('proceedBtn');
+    
+    form.addEventListener('submit', function(e) {
+        const termsCheckbox = document.getElementById('terms');
+        
+        if (!termsCheckbox.checked) {
+            e.preventDefault();
+            alert('Please accept the terms and conditions to continue.');
+            termsCheckbox.focus();
+            return false;
+        }
+        
+        // Show loading state
+        proceedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        proceedBtn.disabled = true;
+    });
+});
+</script>
+
+<style>
+.sticky-top {
+    z-index: 1020;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.payment-method-card {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.payment-method-card:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-header h5 {
+    margin: 0;
+}
+
+@media (max-width: 991.98px) {
+    .sticky-top {
+        position: relative !important;
+        top: auto !important;
+    }
+}
+</style>
+{% endblock %}

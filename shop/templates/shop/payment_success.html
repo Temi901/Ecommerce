@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful - JejeHub{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Success Animation -->
+                    <div class="success-checkmark mb-4">
+                        <div class="check-icon">
+                            <span class="icon-line line-tip"></span>
+                            <span class="icon-line line-long"></span>
+                            <div class="icon-circle"></div>
+                            <div class="icon-fix"></div>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-success mb-3">Payment Successful!</h1>
+                    <p class="lead text-muted mb-4">
+                        Thank you for your purchase. Your order has been confirmed.
+                    </p>
+                    
+                    <div class="order-details bg-light p-4 rounded mb-4">
+                        <h5 class="mb-3">Order Details</h5>
+                        <div class="row">
+                            <div class="col-6 text-start">
+                                <strong>Order Number:</strong>
+                            </div>
+                            <div class="col-6 text-end">
+                                #{{ order.id }}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6 text-start">
+                                <strong>Total Amount:</strong>
+                            </div>
+                            <div class="col-6 text-end text-primary">
+                                <strong>${{ order.total_amount }}</strong>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6 text-start">
+                                <strong>Payment Status:</strong>
+                            </div>
+                            <div class="col-6 text-end">
+                                <span class="badge bg-success">Paid</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-envelope"></i> A confirmation email has been sent to <strong>{{ order.email }}</strong>
+                    </p>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-receipt"></i> View Order Details
+                        </a>
+                        <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- What's Next Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-question-circle text-primary"></i> What happens next?</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> Your order is being processed
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> You'll receive a shipping notification soon
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i> Track your order anytime from your account
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.success-checkmark {
+    width: 80px;
+    height: 115px;
+    margin: 0 auto;
+}
+
+.success-checkmark .check-icon {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border-radius: 50%;
+    box-sizing: content-box;
+    border: 4px solid #4CAF50;
+}
+
+.success-checkmark .check-icon::before {
+    top: 3px;
+    left: -2px;
+    width: 30px;
+    transform-origin: 100% 50%;
+    border-radius: 100px 0 0 100px;
+}
+
+.success-checkmark .check-icon::after {
+    top: 0;
+    left: 30px;
+    width: 60px;
+    transform-origin: 0 50%;
+    border-radius: 0 100px 100px 0;
+    animation: rotate-circle 4.25s ease-in;
+}
+
+.success-checkmark .check-icon::before, 
+.success-checkmark .check-icon::after {
+    content: '';
+    height: 100px;
+    position: absolute;
+    background: #FFFFFF;
+    transform: rotate(-45deg);
+}
+
+.success-checkmark .check-icon .icon-line {
+    height: 5px;
+    background-color: #4CAF50;
+    display: block;
+    border-radius: 2px;
+    position: absolute;
+    z-index: 10;
+}
+
+.success-checkmark .check-icon .icon-line.line-tip {
+    top: 46px;
+    left: 14px;
+    width: 25px;
+    transform: rotate(45deg);
+    animation: icon-line-tip 0.75s;
+}
+
+.success-checkmark .check-icon .icon-line.line-long {
+    top: 38px;
+    right: 8px;
+    width: 47px;
+    transform: rotate(-45deg);
+    animation: icon-line-long 0.75s;
+}
+
+.success-checkmark .check-icon .icon-circle {
+    top: -4px;
+    left: -4px;
+    z-index: 10;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    position: absolute;
+    box-sizing: content-box;
+    border: 4px solid rgba(76, 175, 80, .5);
+}
+
+.success-checkmark .check-icon .icon-fix {
+    top: 8px;
+    width: 5px;
+    left: 26px;
+    z-index: 1;
+    height: 85px;
+    position: absolute;
+    transform: rotate(-45deg);
+    background-color: #FFFFFF;
+}
+
+@keyframes rotate-circle {
+    0% {
+        transform: rotate(-45deg);
+    }
+    5% {
+        transform: rotate(-45deg);
+    }
+    12% {
+        transform: rotate(-405deg);
+    }
+    100% {
+        transform: rotate(-405deg);
+    }
+}
+
+@keyframes icon-line-tip {
+    0% {
+        width: 0;
+        left: 1px;
+        top: 19px;
+    }
+    54% {
+        width: 0;
+        left: 1px;
+        top: 19px;
+    }
+    70% {
+        width: 50px;
+        left: -8px;
+        top: 37px;
+    }
+    84% {
+        width: 17px;
+        left: 21px;
+        top: 48px;
+    }
+    100% {
+        width: 25px;
+        left: 14px;
+        top: 45px;
+    }
+}
+
+@keyframes icon-line-long {
+    0% {
+        width: 0;
+        right: 46px;
+        top: 54px;
+    }
+    65% {
+        width: 0;
+        right: 46px;
+        top: 54px;
+    }
+    84% {
+        width: 55px;
+        right: 0px;
+        top: 35px;
+    }
+    100% {
+        width: 47px;
+        right: 8px;
+        top: 38px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,805 @@
+{% extends 'base.html' %}
+
+{% load currency_filters %}
+{% block title %}Products - TEMI's Store{% endblock %}
+
+{% block content %}
+<style>
+    /* Product List Specific Styles */
+    .page-header {
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.08)"/></svg>');
+        animation: float 15s ease-in-out infinite;
+        opacity: 0.4;
+    }
+
+    .page-header h1 {
+        color: #fff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Enhanced Sidebar */
+    .sidebar-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-header {
+        background: var(--accent-gradient);
+        color: #fff;
+        padding: 1.2rem 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border: none;
+        position: relative;
+    }
+
+    .sidebar-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    }
+
+    .category-list {
+        padding: 1.5rem;
+    }
+
+    .category-item {
+        margin-bottom: 0.8rem;
+        position: relative;
+    }
+
+    .category-link {
+        display: flex;
+        align-items: center;
+        padding: 0.7rem 1rem;
+        color: #555;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: var(--accent-gradient);
+        transition: width 0.3s ease;
+        z-index: 1;
+    }
+
+    .category-link:hover::before {
+        width: 100%;
+    }
+
+    .category-link:hover {
+        color: #fff;
+        transform: translateX(5px);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .category-link i {
+        margin-right: 0.7rem;
+        width: 20px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .category-link span {
+        position: relative;
+        z-index: 2;
+    }
+
+    .category-link.active {
+        background: var(--success-gradient);
+        color: #fff;
+        transform: translateX(5px);
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* Search Results Header */
+    .search-results-header {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .search-results-title {
+        color: #333;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .search-query {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    /* Enhanced Product Cards */
+    .product-card-container {
+        margin-bottom: 2rem;
+    }
+
+    .enhanced-product-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow-soft);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+        height: 100%;
+        position: relative;
+    }
+
+    .enhanced-product-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.6s ease;
+        z-index: 1;
+    }
+
+    .enhanced-product-card:hover::before {
+        left: 100%;
+    }
+
+    .enhanced-product-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+        height: 220px;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .enhanced-product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+
+    .product-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--accent-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 3rem;
+        position: relative;
+    }
+
+    .product-image-placeholder::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--warning-gradient);
+        color: #fff;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 3;
+    }
+
+    .product-content {
+        padding: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .product-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .product-description {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+    }
+
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .product-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        background: var(--success-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stock-badge {
+        background: var(--success-gradient);
+        color: #fff;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(67, 233, 123, 0.3);
+    }
+
+    .stock-badge.low-stock {
+        background: var(--warning-gradient);
+        box-shadow: 0 2px 8px rgba(250, 112, 154, 0.3);
+    }
+
+    .product-actions {
+        margin-top: 1rem;
+    }
+
+    .btn-view-details {
+        background: var(--primary-gradient);
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        padding: 0.7rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-soft);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-view-details::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-view-details:hover::before {
+        left: 100%;
+    }
+
+    .btn-view-details:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+        color: #fff;
+    }
+
+    /* Enhanced Pagination */
+    .pagination-container {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-top: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .pagination {
+        margin: 0;
+        justify-content: center;
+    }
+
+    .page-link {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #555;
+        margin: 0 0.2rem;
+        border-radius: 8px;
+        padding: 0.7rem 1.2rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        background: var(--accent-gradient);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-gradient);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* No Products Message */
+    .no-products-container {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        margin: 2rem 0;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .no-products-icon {
+        font-size: 4rem;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+
+    .no-products-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .no-products-text {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Filter Tags */
+    .filter-tags {
+        margin-bottom: 2rem;
+    }
+
+    .filter-tag {
+        display: inline-block;
+        background: var(--accent-gradient);
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .filter-tag:hover {
+        transform: scale(1.05);
+        color: #fff;
+    }
+
+    .filter-tag .close {
+        margin-left: 0.5rem;
+        font-weight: bold;
+    }
+
+    /* Loading Animation */
+    .loading-container {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .loading-spinner-large {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(102, 126, 234, 0.3);
+        border-radius: 50%;
+        border-top-color: #667eea;
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .sidebar-card {
+            position: static;
+            margin-bottom: 2rem;
+        }
+
+        .product-card-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .enhanced-product-card {
+            margin-bottom: 1rem;
+        }
+    }
+
+    /* Animation delays for staggered effect */
+    .animate-delay-1 { animation-delay: 0.1s; }
+    .animate-delay-2 { animation-delay: 0.2s; }
+    .animate-delay-3 { animation-delay: 0.3s; }
+    .animate-delay-4 { animation-delay: 0.4s; }
+    .animate-delay-5 { animation-delay: 0.5s; }
+    .animate-delay-6 { animation-delay: 0.6s; }
+</style>
+
+<!-- Page Header -->
+<div class="page-header fade-in-up">
+    <h1><i class="fas fa-box me-2"></i> Our Products</h1>
+    <p>Discover our amazing collection of premium products</p>
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-3 col-md-4">
+        <div class="sidebar-card fade-in-up animate-delay-1">
+            <div class="sidebar-header">
+                <i class="fas fa-filter me-2"></i> Categories
+            </div>
+            <div class="category-list">
+                <div class="category-item">
+                    <a href="{% url 'shop:product_list' %}" class="category-link">
+                        <i class="fas fa-th-large"></i>
+                        <span>All Products</span>
+                    </a>
+                </div>
+                {% for category in categories %}
+                <div class="category-item">
+                    <a href="{% url 'shop:product_list' %}?category={{ category.slug }}" 
+                       class="category-link">
+                        <i class="fas fa-tag"></i>
+                        <span>{{ category.name }}</span>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Additional Filters could go here -->
+        <div class="sidebar-card fade-in-up animate-delay-2">
+            <div class="sidebar-header">
+                <i class="fas fa-info-circle me-2"></i> Shopping Tips
+            </div>
+            <div class="category-list">
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-shipping-fast text-success me-1"></i>
+                        Free shipping on orders over $50
+                    </small>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-undo text-info me-1"></i>
+                        30-day return policy
+                    </small>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt text-primary me-1"></i>
+                        Secure payment guaranteed
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Section -->
+    <div class="col-lg-9 col-md-8">
+        {% if query %}
+        <div class="search-results-header fade-in-up animate-delay-1">
+            <h2 class="search-results-title">
+                <i class="fas fa-search me-2"></i>
+                Search results for "<span class="search-query">{{ query }}</span>"
+            </h2>
+            <p class="mb-0 text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Found {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}
+            </p>
+        </div>
+        {% endif %}
+        
+        <!-- Products Grid -->
+        <div class="row">
+            {% for product in page_obj %}
+            <div class="col-xl-4 col-md-6">
+                <div class="product-card-container">
+                    <div class="enhanced-product-card fade-in-up animate-delay-{{ forloop.counter|add:1 }}">
+                        <div class="product-image-container">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" 
+                                     class="product-image" 
+                                     alt="{{ product.name }}">
+                            {% else %}
+                                <div class="product-image-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            {% endif %}
+                            
+                            {% if product.stock <= 10 %}
+                            <div class="product-badge">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Low Stock
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="product-content d-flex flex-column">
+                            <h3 class="product-title">{{ product.name }}</h3>
+                            <p class="product-description flex-grow-1">
+                                {{ product.description|truncatewords:15 }}
+                            </p>
+                            
+                            <div class="product-footer">
+                                <span class="product-price">{{ product.price|naira }}</span>
+                                <span class="stock-badge {% if product.stock <= 10 %}low-stock{% endif %}">
+                                    <i class="fas fa-box me-1"></i>
+                                    {{ product.stock }} left
+                                </span>
+                            </div>
+                            
+                            <div class="product-actions">
+                                <a href="{{ product.get_absolute_url }}" class="btn-view-details">
+                                    <i class="fas fa-eye me-2"></i>
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="no-products-container fade-in-up">
+                    <div class="no-products-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="no-products-title">No products found</h3>
+                    <p class="no-products-text">
+                        {% if query %}
+                            Sorry, we couldn't find any products matching "<strong>{{ query }}</strong>".
+                            <br>Try adjusting your search terms or browse our categories.
+                        {% else %}
+                            There are no products available in this category at the moment.
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        View All Products
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-container fade-in-up animate-delay-2">
+            <nav aria-label="Products pagination">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                                <i class="fas fa-chevron-left me-1"></i>
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">
+                                Next
+                                <i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} products
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Highlight active category
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeCategory = urlParams.get('category');
+        
+        if (activeCategory) {
+            const categoryLink = document.querySelector(`a[href*="category=${activeCategory}"]`);
+            if (categoryLink) {
+                categoryLink.classList.add('active');
+            }
+        } else {
+            // Highlight "All Products" if no category is selected
+            const allProductsLink = document.querySelector('a[href="{% url "shop:product_list" %}"]');
+            if (allProductsLink && !window.location.search) {
+                allProductsLink.classList.add('active');
+            }
+        }
+    });
+
+    // Smooth card animations on scroll
+    const cardObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    // Observe product cards
+    document.querySelectorAll('.enhanced-product-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        cardObserver.observe(card);
+    });
+
+    // Add to cart functionality (placeholder)
+    document.querySelectorAll('.btn-view-details').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Add subtle click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Enhanced search functionality
+    const searchForm = document.querySelector('form[action*="product_list"]');
+    if (searchForm) {
+        const searchInput = searchForm.querySelector('input[name="q"]');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                // Could implement live search here
+                const query = this.value.trim();
+                if (query.length > 2) {
+                    // Add visual feedback for active search
+                    this.style.borderColor = '#4facfe';
+                    this.style.boxShadow = '0 0 10px rgba(79, 172, 254, 0.3)';
+                } else {
+                    this.style.borderColor = '';
+                    this.style.boxShadow = '';
+                }
+            });
+        }
+    }
+
+    // Lazy loading for images
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+</script>
+{% endblock %}

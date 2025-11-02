@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms of Service{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="text-center mb-4">Terms of Service</h1>
+            <p>Welcome to our E-Commerce Store! By using our website, you agree to these Terms of Service. Please read them carefully.</p>
+            
+            <h2>1. Account Registration</h2>
+            <p>To access certain features of the site, you may be required to register for an account. You agree to provide accurate and complete information during the registration process.</p>
+
+            <h2>2. Privacy Policy</h2>
+            <p>Your use of our services is also governed by our Privacy Policy, which is incorporated by reference into these Terms. Please review our Privacy Policy to understand our practices.</p>
+
+            <a href="{% url 'shop:register' %}" class="btn btn-secondary mt-4">
+                <i class="fas fa-arrow-left me-2"></i> Go Back to Registration
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

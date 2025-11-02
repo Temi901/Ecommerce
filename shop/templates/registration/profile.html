@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+{% block title %}My Profile - E-Commerce Store{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+                <li class="breadcrumb-item active">My Profile</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<h2 class="mb-4">
+    <i class="fas fa-user-circle"></i> My Profile
+</h2>
+
+<div class="row">
+    <!-- Profile Sidebar -->
+    <div class="col-lg-3 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle fa-5x text-primary"></i>
+                </div>
+                <h5 class="card-title">{{ user.get_full_name|default:user.username }}</h5>
+                <p class="text-muted small">{{ user.email }}</p>
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'shop:account_settings' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-cog"></i> Account Settings
+                    </a>
+                    <a href="{% url 'custom_password_change' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Member Since:</span>
+                    <span class="small">{{ user.date_joined|date:"M Y" }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Total Orders:</span>
+                    <span class="small">{{ user.orders.count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="col-lg-9">
+        <!-- Account Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Account Information
+                </h5>
+                <a href="{% url 'shop:account_settings' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Username</label>
+                        <p class="mb-0">{{ user.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Email Address</label>
+                        <p class="mb-0">{{ user.email|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="text-muted small">First Name</label>
+                        <p class="mb-0">{{ user.first_name|default:"Not provided" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Last Name</label>
+                        <p class="mb-0">{{ user.last_name|default:"Not provided" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-shopping-bag"></i> Recent Orders
+                </h5>
+                <a href="{% url 'shop:order_history' %}" class="btn btn-sm btn-outline-primary">
+                    View All Orders
+                </a>
+            </div>
+            <div class="card-body">
+                {% if user.orders.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in user.orders.all|slice:":5" %}
+                                <tr>
+                                    <td>#{{ order.user_order_number }}</td>
+                                    <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.status == 'delivered' %}bg-success
+                                            {% elif order.status == 'shipped' %}bg-info
+                                            {% elif order.status == 'processing' %}bg-warning
+                                            {% elif order.status == 'cancelled' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.total_amount|naira }}</td>
+                                    <td>
+                                        <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">You haven't placed any orders yet.</p>
+                        <a href="{% url 'shop:product_list' %}" class="btn btn-primary">
+                            Start Shopping
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shopping-cart"></i>
+                            <br>
+                            Continue Shopping
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'shop:order_history' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-history"></i>
+                            <br>
+                            Order History
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-shopping-bag"></i>
+                            <br>
+                            View Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: 1px solid #e9ecef;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
