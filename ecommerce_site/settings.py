@@ -17,12 +17,20 @@ from decimal import Decimal
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9k%mra6a2v61p5jitf8sm!+u(uu(6_5x$+prga)c$kb%4$0ubq'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9k%mra6a2v61p5jitf8sm!+u(uu(6_5x$+prga)c$kb%4$0ubq')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Set to True for development
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Add Railway domain
+RAILWAY_ENVIRONMENT = os.environ.get('RAILWAY_ENVIRONMENT')
+if RAILWAY_ENVIRONMENT:
+    # Allow all Railway.app domains
+    ALLOWED_HOSTS.append('.railway.app')
+    # Or add your specific domain
+    ALLOWED_HOSTS.append('web-production-1a361.up.railway.app')
 
 # Email Configuration - GMAIL SMTP
 # This will send actual emails to Gmail inbox
@@ -30,10 +38,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'Jejetemmy8@gmail.com'
-EMAIL_HOST_PASSWORD = 'cjxr pkjq dfxq mync'  # Your Gmail App Password
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'Jejetemmy8@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'cjxr pkjq dfxq mync')
 DEFAULT_FROM_EMAIL = 'JejeHub <Jejetemmy8@gmail.com>'
-SERVER_EMAIL = 'Jejetemmy8@gmail.com'
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'Jejetemmy8@gmail.com')
 
 # Optional: Uncomment below to test emails in console instead of sending to Gmail
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -161,10 +169,10 @@ MESSAGE_TAGS = {
 
 
 # Flutterwave Configuration
-FLUTTERWAVE_PUBLIC_KEY = 'FLWPUBK_TEST-7b9348f1b1b9d2e6163d2dc82233594a-X'
-FLUTTERWAVE_SECRET_KEY = 'FLWSECK_TEST-095dd8bf98831271b8e5737c16a66a0e-X'
-FLUTTERWAVE_ENCRYPTION_KEY = 'FLWSECK_TESTe93f5eb0e359'
-FLUTTERWAVE_WEBHOOK_SECRET = 'Temitope1910$'
+FLUTTERWAVE_PUBLIC_KEY = os.environ.get('FLUTTERWAVE_PUBLIC_KEY', 'FLWPUBK_TEST-7b9348f1b1b9d2e6163d2dc82233594a-X')
+FLUTTERWAVE_SECRET_KEY = os.environ.get('FLUTTERWAVE_SECRET_KEY', 'FLWSECK_TEST-095dd8bf98831271b8e5737c16a66a0e-X')
+FLUTTERWAVE_ENCRYPTION_KEY = os.environ.get('FLUTTERWAVE_ENCRYPTION_KEY', 'FLWSECK_TESTe93f5eb0e359')
+FLUTTERWAVE_WEBHOOK_SECRET = os.environ.get('FLUTTERWAVE_WEBHOOK_SECRET', 'Temitope1910$')
 
 # Use test keys for development
 # Get your keys from https://dashboard.flutterwave.com/settings/apis
