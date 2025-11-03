@@ -22,15 +22,22 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9k%mra6a2v61p5jitf8sm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# Updated ALLOWED_HOSTS for Render
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'ecommerce-bing.onrender.com',  # Your Render domain
+    '.onrender.com',  # All Render domains
+    '.railway.app',  # Keep Railway support
+    'web-production-1a361.up.railway.app',
+]
 
-# Add Railway domain
-RAILWAY_ENVIRONMENT = os.environ.get('RAILWAY_ENVIRONMENT')
-if RAILWAY_ENVIRONMENT:
-    # Allow all Railway.app domains
-    ALLOWED_HOSTS.append('.railway.app')
-    # Or add your specific domain
-    ALLOWED_HOSTS.append('web-production-1a361.up.railway.app')
+# CSRF trusted origins for Render
+CSRF_TRUSTED_ORIGINS = [
+    'https://ecommerce-bing.onrender.com',
+    'https://*.onrender.com',
+    'https://*.railway.app',
+]
 
 # Email Configuration - GMAIL SMTP
 # This will send actual emails to Gmail inbox
@@ -59,6 +66,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Added for static files on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -129,6 +137,9 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Whitenoise configuration for better static file serving
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files (User uploaded content)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -156,6 +167,9 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Message framework settings
 from django.contrib.messages import constants as messages
