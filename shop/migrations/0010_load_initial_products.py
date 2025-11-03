@@ -35,18 +35,17 @@ def load_products(apps, schema_editor):
         if item['model'] == 'shop.product':
             if not Product.objects.filter(pk=item['pk']).exists():
                 category = Category.objects.get(pk=item['fields']['category'])
+                fields = item['fields']
                 Product.objects.create(
                     id=item['pk'],
                     category=category,
-                    name=item['fields']['name'],
-                    slug=item['fields']['slug'],
-                    description=item['fields']['description'],
-                    price=item['fields']['price'],
-                    available=item['fields']['available'],
-                    stock=item['fields']['stock'],
-                    created=item['fields']['created'],
-                    updated=item['fields']['updated'],
-                    # Note: images will be added separately
+                    name=fields['name'],
+                    slug=fields['slug'],
+                    description=fields.get('description', ''),
+                    price=fields['price'],
+                    available=fields.get('available', True),
+                    stock=fields.get('stock', 0),
+                    # Skip created/updated - Django will auto-set them
                 )
                 products_loaded += 1
     
@@ -65,6 +64,7 @@ class Migration(migrations.Migration):
         ('shop', '0009_order_user_order_number'),  # Change this to your latest migration
     ]
 
+    
     operations = [
         migrations.RunPython(load_products, reverse_func),
     ]
