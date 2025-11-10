@@ -596,7 +596,7 @@
                     <div class="enhanced-product-card fade-in-up animate-delay-{{ forloop.counter|add:1 }}">
                         <div class="product-image-container">
                             {% if product.image %}
-                                <img src="{{ product.image.url }}" 
+                                <img src="{{ product.image_url }}" 
                                      class="product-image" 
                                      alt="{{ product.name }}">
                             {% else %}

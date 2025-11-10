@@ -38,6 +38,29 @@ class Product(models.Model):
     
     def get_absolute_url(self):
         return reverse('shop:product_detail', args=[self.slug])
+    
+    @property
+    def image_url(self):
+        """Get the proper Cloudinary URL"""
+        if not self.image:
+            return None
+        
+        image_str = str(self.image)
+        
+        # If it's already a full URL, return it
+        if image_str.startswith('http'):
+            return image_str
+        
+        # If it's a Cloudinary path, build the URL
+        if image_str.startswith('products/product_'):
+            cloud_name = 'dznwck80z'
+            return f'https://res.cloudinary.com/{cloud_name}/image/upload/{image_str}'
+        
+        # Fallback to default Django media URL
+        try:
+            return self.image.url
+        except:
+            return None
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

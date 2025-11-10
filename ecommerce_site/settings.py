@@ -189,7 +189,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # Security settings - ONLY for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
