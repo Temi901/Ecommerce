@@ -49,10 +49,11 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'Jejetemmy8@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'cjxr pkjq dfxq mync')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'JejeHub <Jejetemmy8@gmail.com>'
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'Jejetemmy8@gmail.com')
+EMAIL_TIMEOUT = 10 
 
 # Optional: Uncomment below to test emails in console instead of sending to Gmail
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
