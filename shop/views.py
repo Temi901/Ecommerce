@@ -21,6 +21,8 @@ from .email_service import send_order_processing_email
 from threading import Thread
 from .payment_service import FlutterwavePayment
 from decimal import Decimal
+from django.core.mail import send_mail
+
 
 
 @login_required
@@ -818,3 +820,36 @@ def payment_webhook(request):
     except Exception as e:
         print(f"Webhook error: {e}")
         return HttpResponse(status=400)
+      
+def test_email_view(request):
+    """Test email sending - DELETE AFTER TESTING"""
+    if not request.user.is_superuser:
+        return HttpResponse("❌ Not authorized - Please login as admin")
+    
+    try:
+        send_mail(
+            subject='🎉 Test Email from JejeHub Store',
+            message='Congratulations! Your email configuration is working perfectly. You can now send order notifications to customers.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['Jejetemmy8@gmail.com'],
+            fail_silently=False,
+        )
+        return HttpResponse('''
+            <h1>✅ Email Sent Successfully!</h1>
+            <p>Check your inbox at <strong>Jejetemmy8@gmail.com</strong></p>
+            <p>If you received the email, your configuration is working!</p>
+            <br>
+            <a href="/admin/shop/order/">Go to Orders Admin</a>
+        ''')
+    except Exception as e:
+        return HttpResponse(f'''
+            <h1>❌ Email Failed</h1>
+            <p><strong>Error:</strong> {str(e)}</p>
+            <br>
+            <h3>Troubleshooting:</h3>
+            <ol>
+                <li>Check if you added EMAIL_HOST_USER to Render environment variables</li>
+                <li>Check if you added EMAIL_HOST_PASSWORD to Render environment variables</li>
+                <li>Make sure the password is a Gmail App Password (not your regular password)</li>
+            </ol>
+        ''')

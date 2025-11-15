@@ -68,4 +68,5 @@ urlpatterns = [
     # Legal pages
     path('terms/', views.terms_of_service, name='terms_of_service'),
     path('privacy/', views.privacy_policy, name='privacy_policy'),
+    path('test-email-now/', views.test_email_view, name='test_email'),
 ]
