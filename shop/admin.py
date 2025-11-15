@@ -3,10 +3,14 @@ from django.contrib import messages
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
 from .email_service import send_order_shipped_email, send_order_delivered_email
 from .models import Payment
+from threading import Thread
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug', 'created_at']
     prepopulated_fields = {'slug': ('name',)}
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -16,10 +20,12 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
     list_editable = ['price', 'stock', 'available']
 
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
     readonly_fields = ['product', 'price', 'quantity']
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -49,27 +55,42 @@ class OrderAdmin(admin.ModelAdmin):
     actions = ['mark_as_processing', 'mark_as_shipped', 'mark_as_delivered']
     
     def save_model(self, request, obj, form, change):
-        """Override save_model to send emails when status changes"""
+        """Override save_model to send emails asynchronously when status changes"""
         if change:  # Only for existing orders (not new ones)
-            # Get the original object from database
-            old_obj = Order.objects.get(pk=obj.pk)
-            old_status = old_obj.status
-            new_status = obj.status
-            
-            # Save the order first
-            super().save_model(request, obj, form, change)
-            
-            # Send email if status changed
-            if old_status != new_status:
-                try:
+            try:
+                # Get the original object from database
+                old_obj = Order.objects.get(pk=obj.pk)
+                old_status = old_obj.status
+                new_status = obj.status
+                
+                # Save the order first
+                super().save_model(request, obj, form, change)
+                
+                # Send email asynchronously if status changed
+                if old_status != new_status:
                     if new_status == 'shipped':
-                        send_order_shipped_email(obj, obj.tracking_number, obj.carrier)
-                        messages.success(request, f'Order #{obj.id} marked as shipped. Email sent to {obj.email}')
+                        try:
+                            # Send email in background thread to prevent timeout
+                            Thread(
+                                target=send_order_shipped_email, 
+                                args=(obj, obj.tracking_number, obj.carrier)
+                            ).start()
+                            messages.success(request, f'Order #{obj.id} marked as shipped. Email being sent to {obj.email}')
+                        except Exception as e:
+                            messages.warning(request, f'Order updated but email failed: {str(e)}')
                     elif new_status == 'delivered':
-                        send_order_delivered_email(obj)
-                        messages.success(request, f'Order #{obj.id} marked as delivered. Email sent to {obj.email}')
-                except Exception as e:
-                    messages.warning(request, f'Order updated but email failed: {str(e)}')
+                        try:
+                            # Send email in background thread to prevent timeout
+                            Thread(
+                                target=send_order_delivered_email, 
+                                args=(obj,)
+                            ).start()
+                            messages.success(request, f'Order #{obj.id} marked as delivered. Email being sent to {obj.email}')
+                        except Exception as e:
+                            messages.warning(request, f'Order updated but email failed: {str(e)}')
+            except Order.DoesNotExist:
+                # If we can't get the old object, just save normally
+                super().save_model(request, obj, form, change)
         else:
             # New order, just save normally
             super().save_model(request, obj, form, change)
@@ -81,7 +102,7 @@ class OrderAdmin(admin.ModelAdmin):
     mark_as_processing.short_description = "Mark selected orders as Processing"
     
     def mark_as_shipped(self, request, queryset):
-        """Mark selected orders as shipped and send email notifications"""
+        """Mark selected orders as shipped and send email notifications asynchronously"""
         updated = 0
         failed = 0
         for order in queryset:
@@ -89,22 +110,25 @@ class OrderAdmin(admin.ModelAdmin):
                 order.status = 'shipped'
                 order.save()
                 
-                # Send shipped email
+                # Send shipped email asynchronously
                 try:
-                    send_order_shipped_email(order, order.tracking_number, order.carrier)
+                    Thread(
+                        target=send_order_shipped_email, 
+                        args=(order, order.tracking_number, order.carrier)
+                    ).start()
                     updated += 1
                 except Exception as e:
                     failed += 1
                     messages.warning(request, f'Order #{order.id}: Email failed - {str(e)}')
         
         if updated > 0:
-            messages.success(request, f'{updated} order(s) marked as shipped and emails sent.')
+            messages.success(request, f'{updated} order(s) marked as shipped. Emails being sent.')
         if failed > 0:
             messages.error(request, f'{failed} order(s) updated but emails failed.')
     mark_as_shipped.short_description = "Mark as Shipped and Send Email"
     
     def mark_as_delivered(self, request, queryset):
-        """Mark selected orders as delivered and send email notifications"""
+        """Mark selected orders as delivered and send email notifications asynchronously"""
         updated = 0
         failed = 0
         for order in queryset:
@@ -112,16 +136,19 @@ class OrderAdmin(admin.ModelAdmin):
                 order.status = 'delivered'
                 order.save()
                 
-                # Send delivered email
+                # Send delivered email asynchronously
                 try:
-                    send_order_delivered_email(order)
+                    Thread(
+                        target=send_order_delivered_email, 
+                        args=(order,)
+                    ).start()
                     updated += 1
                 except Exception as e:
                     failed += 1
                     messages.warning(request, f'Order #{order.id}: Email failed - {str(e)}')
         
         if updated > 0:
-            messages.success(request, f'{updated} order(s) marked as delivered and emails sent.')
+            messages.success(request, f'{updated} order(s) marked as delivered. Emails being sent.')
         if failed > 0:
             messages.error(request, f'{failed} order(s) updated but emails failed.')
     mark_as_delivered.short_description = "Mark as Delivered and Send Email"
