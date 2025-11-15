@@ -18,6 +18,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .email_service import send_order_processing_email 
+from threading import Thread
 from .payment_service import FlutterwavePayment
 from decimal import Decimal
 
@@ -742,9 +743,9 @@ def payment_callback(request):
             order.status = 'processing'
             order.save()
             
-            # Send confirmation email
+            # Send confirmation email asynchronously to avoid timeout
             try:
-                send_order_processing_email(order)
+                Thread(target=send_order_processing_email, args=(order,)).start()
             except Exception as e:
                 print(f"Email error: {e}")
             
@@ -774,8 +775,6 @@ def payment_callback(request):
         
         messages.error(request, 'Payment was not successful. Please try again.')
         return redirect('shop:cart_detail')
-
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def payment_webhook(request):
