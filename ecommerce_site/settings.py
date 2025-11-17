@@ -43,22 +43,24 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
 ]
 
-# Email Configuration - Gmail SMTP (Clean & Secure)
+# Email Configuration - Gmail SMTP (Port 465 SSL)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465  # Changed from 587
+EMAIL_USE_SSL = True  # Changed from EMAIL_USE_TLS
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'JejeHub <jejetemmy8@gmail.com>'
 SERVER_EMAIL = 'jejetemmy8@gmail.com'
 EMAIL_TIMEOUT = 10
 
-# Debug email configuration
+# Debug email configuration (remove after testing)
 import sys
 print(f"DEBUG EMAIL_HOST_USER: '{EMAIL_HOST_USER}'", file=sys.stderr)
 print(f"DEBUG EMAIL_HOST_PASSWORD exists: {bool(EMAIL_HOST_PASSWORD)}", file=sys.stderr)
 print(f"DEBUG EMAIL_HOST_PASSWORD length: {len(EMAIL_HOST_PASSWORD) if EMAIL_HOST_PASSWORD else 0}", file=sys.stderr)
+print(f"DEBUG EMAIL_PORT: {465}", file=sys.stderr)
+print(f"DEBUG EMAIL_USE_SSL: {True}", file=sys.stderr)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
