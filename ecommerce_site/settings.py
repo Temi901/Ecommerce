@@ -54,9 +54,11 @@ DEFAULT_FROM_EMAIL = 'JejeHub <jejetemmy8@gmail.com>'
 SERVER_EMAIL = 'jejetemmy8@gmail.com'
 EMAIL_TIMEOUT = 10
 
-
-# Optional: Uncomment below to test emails in console instead of sending to Gmail
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend      tlvl pcpf zboo bqta'
+# Debug email configuration
+import sys
+print(f"DEBUG EMAIL_HOST_USER: '{EMAIL_HOST_USER}'", file=sys.stderr)
+print(f"DEBUG EMAIL_HOST_PASSWORD exists: {bool(EMAIL_HOST_PASSWORD)}", file=sys.stderr)
+print(f"DEBUG EMAIL_HOST_PASSWORD length: {len(EMAIL_HOST_PASSWORD) if EMAIL_HOST_PASSWORD else 0}", file=sys.stderr)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
